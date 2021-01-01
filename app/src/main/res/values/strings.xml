@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Janio</string>
+    <string name="undo">Undo</string>
+    <string name="enter_some_text">Enter Some Text</string>
 </resources>
