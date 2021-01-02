@@ -1,9 +1,9 @@
 package com.arjun.janio
 
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.viewbinding.ViewBinding
@@ -11,20 +11,21 @@ import com.arjun.janio.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), TextUndoRedo.TextChangeInfo {
 
+    private val viewModel by viewModels<MainViewModel>()
     private val binding by viewBinding(ActivityMainBinding::inflate)
-    private lateinit var textUndoRedo: TextUndoRedo
+    private lateinit var undoManager: UndoRedoHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        textUndoRedo = TextUndoRedo(binding.textField, this)
+        undoManager = UndoRedoHelper(binding.textField)
+
+//        textUndoRedo = TextUndoRedo(binding.textField, this)
 
         binding.textField.apply {
             setOnFocusChangeListener { _, hasFocus ->
-
-                binding.undo.isEnabled = !hasFocus || binding.textField.editableText.isNotEmpty()
-                binding.textView.text = "${getWordCount(binding.textField.editableText)} words."
+                viewModel.setFocus(hasFocus)
             }
 
             doOnTextChanged { text, start, before, count ->
@@ -32,20 +33,41 @@ class MainActivity : AppCompatActivity(), TextUndoRedo.TextChangeInfo {
                 Log.d(TAG, "$start")
                 Log.d(TAG, "$before")
                 Log.d(TAG, "$count")
+
+                viewModel.setText(text = text.toString())
+
             }
         }
 
         binding.undo.setOnClickListener {
-            textUndoRedo.exeUndo()
-            binding.textView.text = "${getWordCount(binding.textField.editableText)} words."
+            if (undoManager.canUndo)
+                undoManager.undo()
+        }
+
+        viewModel.hasFocus.observe(this) { hasFocus ->
+            binding.undo.isEnabled = !hasFocus || !viewModel.text.value.isNullOrEmpty()
+
+            viewModel.wordCount.observe(this) { count ->
+
+                if (!hasFocus) binding.textView.text = "$count words."
+            }
         }
 
     }
 
-    private fun getWordCount(editable: Editable): Int = editable.split(" ").filter { it.isNotEmpty() }.size
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: ${binding.textField.text}")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: ${binding.textField.text}")
+    }
+
 
     override fun textAction() {
-        binding.undo.isEnabled = textUndoRedo.canUndo()
+//        binding.undo.isEnabled = textUndoRedo.canUndo()
     }
 
     companion object {

@@ -31,7 +31,7 @@ class TextUndoRedo(editText: EditText, info: TextChangeInfo?) : TextWatcher {
         cleanNext()
     }
 
-    private fun noticeTextChang() {
+    private fun noticeTextChange() {
         info?.textAction()
     }
 
@@ -68,7 +68,7 @@ class TextUndoRedo(editText: EditText, info: TextChangeInfo?) : TextWatcher {
         if (Or) {
             offset = offset?.prior
         }
-        noticeTextChang()
+        noticeTextChange()
     }
 
     @Deprecated("")
@@ -78,7 +78,7 @@ class TextUndoRedo(editText: EditText, info: TextChangeInfo?) : TextWatcher {
         }
         Record(start, start + after, s.subSequence(start, start + count))
         cleanNext()
-        noticeTextChang()
+        noticeTextChange()
     }
 
     @Deprecated("")
