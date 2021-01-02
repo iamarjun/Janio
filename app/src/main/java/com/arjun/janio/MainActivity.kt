@@ -9,7 +9,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.viewbinding.ViewBinding
 import com.arjun.janio.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), TextUndoRedo.TextChangeInfo {
+class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
     private val binding by viewBinding(ActivityMainBinding::inflate)
@@ -21,18 +21,18 @@ class MainActivity : AppCompatActivity(), TextUndoRedo.TextChangeInfo {
 
         undoManager = UndoRedoHelper(binding.textField)
 
-//        textUndoRedo = TextUndoRedo(binding.textField, this)
-
         binding.textField.apply {
             setOnFocusChangeListener { _, hasFocus ->
+                Log.d(TAG, "$hasFocus")
                 viewModel.setFocus(hasFocus)
+                binding.undo.isEnabled = !hasFocus && !viewModel.isTextEmptyOrNull
             }
 
             doOnTextChanged { text, start, before, count ->
-                Log.d(TAG, "$text")
-                Log.d(TAG, "$start")
-                Log.d(TAG, "$before")
-                Log.d(TAG, "$count")
+//                Log.d(TAG, "$text")
+//                Log.d(TAG, "$start")
+//                Log.d(TAG, "$before")
+//                Log.d(TAG, "$count")
 
                 viewModel.setText(text = text.toString())
 
@@ -44,30 +44,11 @@ class MainActivity : AppCompatActivity(), TextUndoRedo.TextChangeInfo {
                 undoManager.undo()
         }
 
-        viewModel.hasFocus.observe(this) { hasFocus ->
-            binding.undo.isEnabled = !hasFocus || !viewModel.text.value.isNullOrEmpty()
-
-            viewModel.wordCount.observe(this) { count ->
-
-                if (!hasFocus) binding.textView.text = "$count words."
+        viewModel.wordCount.observe(this) { count ->
+            viewModel.hasFocus.observe(this) {
+                if (!it) binding.textView.text = "$count words."
             }
         }
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart: ${binding.textField.text}")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop: ${binding.textField.text}")
-    }
-
-
-    override fun textAction() {
-//        binding.undo.isEnabled = textUndoRedo.canUndo()
     }
 
     companion object {
