@@ -1,11 +1,16 @@
 package com.arjun.janio
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
+import java.util.*
 
 class MainViewModel : ViewModel() {
 
     private val _text by lazy { MutableLiveData<String>() }
     private val _hasFocus by lazy { MutableLiveData<Boolean>(false) }
+    private val stack by lazy { Stack<String>() }
 
     val wordCount
         get() =
@@ -20,7 +25,15 @@ class MainViewModel : ViewModel() {
         _text.value = text
     }
 
+    fun canUndo(): Boolean = stack.isNotEmpty()
+
+    fun undo(): String = stack.pop()
+
     fun setFocus(focus: Boolean) {
         _hasFocus.value = focus
+    }
+
+    fun push(text: String) {
+        stack.push(text)
     }
 }

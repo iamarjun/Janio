@@ -13,13 +13,10 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
     private val binding by viewBinding(ActivityMainBinding::inflate)
-    private lateinit var undoManager: UndoRedoHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
-        undoManager = UndoRedoHelper(binding.textField)
 
         binding.textField.apply {
             setOnFocusChangeListener { _, hasFocus ->
@@ -29,10 +26,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             doOnTextChanged { text, start, before, count ->
-//                Log.d(TAG, "$text")
-//                Log.d(TAG, "$start")
-//                Log.d(TAG, "$before")
-//                Log.d(TAG, "$count")
+                Log.d(TAG, "$text")
+                Log.d(TAG, "$start")
+                Log.d(TAG, "$before")
+                Log.d(TAG, "$count")
+                if (viewModel.hasFocus.value == true)
+                    viewModel.push(text.toString())
 
                 viewModel.setText(text = text.toString())
 
@@ -40,8 +39,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.undo.setOnClickListener {
-            if (undoManager.canUndo)
-                undoManager.undo()
+            if (viewModel.canUndo())
+                binding.textField.setText(viewModel.undo())
         }
 
         viewModel.wordCount.observe(this) { count ->
