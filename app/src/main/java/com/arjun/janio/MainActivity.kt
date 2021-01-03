@@ -6,9 +6,12 @@ import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.arjun.janio.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
@@ -48,6 +51,15 @@ class MainActivity : AppCompatActivity() {
                 if (!it) binding.textView.text = "$count words."
             }
         }
+
+        viewModel.initialText.observe(this) {
+            binding.textField.setText(it)
+        }
+    }
+
+    override fun onStop() {
+        viewModel.saveData()
+        super.onStop()
     }
 
     companion object {

@@ -6,7 +6,7 @@ import java.util.*
 
 @Entity
 data class EditHistory(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     val id: Int,
     val history: Stack<String>
 )
